@@ -3,6 +3,8 @@ const babylon = require('babylon')
 const path = require('path')
 const traverse = require('babel-traverse').default
 const babel = require('babel-core')
+const config = require('./config')
+const mkdirp = require('mkdirp')
 let ID = 0
 
 function createAsset (filename) {
@@ -10,7 +12,6 @@ function createAsset (filename) {
   const ast = babylon.parse(content, {
     sourceType: 'module'
   })
-  console.log(ast)
   const dependencies = []
   traverse(ast, {
     ImportDeclaration: ({node}) => {
@@ -72,8 +73,7 @@ function bundle (graph) {
   return result
 }
 
-const graph = createGraph('./example/entry.js')
+const graph = createGraph(config.entry)
 const result = bundle(graph)
-fs.writeFileSync('./dist/bundle-main.js', result)
-
-console.log(result)
+mkdirp.sync(config.output.path)
+fs.writeFileSync(path.join(config.output.path, config.output.filename), result)
